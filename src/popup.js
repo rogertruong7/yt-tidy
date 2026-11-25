@@ -1,8 +1,12 @@
 /* global YT_TIDY_DEFAULTS, YT_TIDY_COLUMN_CHOICES */
 const columnsGroup = document.getElementById("columns");
-const toggles = ["hideShorts", "hideSidebar", "hideShortsLink"].map((id) =>
-  document.getElementById(id),
-);
+const toggles = [
+  "hideShorts",
+  "hideBreakingNews",
+  "squareCorners",
+  "hideSidebar",
+  "hideShortsLink",
+].map((id) => document.getElementById(id));
 const hideSidebar = document.getElementById("hideSidebar");
 const hideShortsLink = document.getElementById("hideShortsLink");
 

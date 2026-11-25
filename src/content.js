@@ -18,6 +18,9 @@
     setShown("data-ytt-shorts", !settings.hideShorts);
     setShown("data-ytt-shorts-link", !settings.hideShortsLink);
     setShown("data-ytt-sidebar", !settings.hideSidebar);
+    setShown("data-ytt-breaking-news", !settings.hideBreakingNews);
+    if (settings.squareCorners) root.removeAttribute("data-ytt-corners");
+    else root.setAttribute("data-ytt-corners", "round");
 
     const columns = YT_TIDY_COLUMN_CHOICES.includes(Number(settings.columns))
       ? Number(settings.columns)
@@ -58,7 +61,29 @@
     return content?.firstElementChild?.tagName === "YTD-SHELF-RENDERER";
   }
 
+  // The "Breaking news" shelf has no marker of its own, only its title, so
+  // tag it for content.css. Re-checked on every pass because YouTube reuses
+  // section elements when the feed changes (e.g. picking a topic chip).
+  const BREAKING_NEWS_TITLE = /^breaking news$/i;
+
+  function tagShelves(contents) {
+    for (const section of contents.querySelectorAll(
+      ":scope > ytd-rich-section-renderer",
+    )) {
+      const title = section
+        .querySelector("ytd-rich-shelf-renderer #title")
+        ?.textContent.trim();
+      const kind = title && BREAKING_NEWS_TITLE.test(title) ? "breaking-news" : "";
+      if ((section.dataset.yttShelf ?? "") !== kind) {
+        if (kind) section.dataset.yttShelf = kind;
+        else delete section.dataset.yttShelf;
+      }
+    }
+  }
+
   function reflow(contents) {
+    tagShelves(contents);
+
     const perRow = videosPerRow(contents.parentElement);
     if (!perRow) return;
 
@@ -110,15 +135,17 @@
     });
   }
 
-  // Re-run when videos or shelves are added to a feed, and when a shelf
-  // renders its contents (that is when a Shorts shelf becomes hidden, or a
-  // heading becomes recognisable).
+  // Re-run when videos or shelves are added to a feed, when a shelf renders
+  // its contents (that is when a Shorts shelf becomes hidden, or a heading
+  // becomes recognisable), and when a shelf's title text arrives.
   new MutationObserver((records) => {
     for (const { target } of records) {
       const parentTag = target.parentElement?.tagName;
       if (
         (target.id === "contents" && parentTag === "YTD-RICH-GRID-RENDERER") ||
-        (target.id === "content" && parentTag === "YTD-RICH-SECTION-RENDERER")
+        (target.id === "content" && parentTag === "YTD-RICH-SECTION-RENDERER") ||
+        (target.closest?.("ytd-rich-shelf-renderer #title") &&
+          target.closest("ytd-rich-section-renderer"))
       ) {
         scheduleReflow();
         return;

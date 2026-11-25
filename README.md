@@ -3,12 +3,14 @@
 A Chrome extension that cleans up the YouTube home page:
 
 1. Hides the Shorts shelves on Home and Subscriptions.
-2. Hides the left sidebar, so the video grid gets the full width.
-3. Shows 4 videos per row on Home and Subscriptions, instead of YouTube's 3.
+2. Hides the Breaking news shelf on Home.
+3. Hides the left sidebar, so the video grid gets the full width.
+4. Shows 4 videos per row on Home and Subscriptions, instead of YouTube's 3.
+5. Squares off the rounded corners on thumbnails and their hover highlight.
 
 Each one can be switched off, and the row count changed (3 to 6), from the toolbar popup.
 
-<img src="docs/popup.png" alt="The YT Tidy popup: videos-per-row picker set to 4, with Shorts shelves and the sidebar hidden" width="272">
+<img src="docs/popup.png" alt="The YT Tidy popup: videos-per-row picker set to 4, with every hide option and square corners switched on" width="272">
 
 ## Install
 
@@ -28,7 +30,7 @@ It needs only the `storage` permission (for your settings) and runs only on `www
 ## Notes
 
 - With the sidebar hidden, the menu button goes too. Subscriptions is still at `youtube.com/feed/subscriptions`, or switch the sidebar back on in the popup.
-- The sidebar's Shorts link is matched by its English title ("Shorts"). In other languages, hide the whole sidebar instead.
+- The Breaking news shelf and the sidebar's Shorts link have no marker of their own, so they are matched by their English titles ("Breaking news", "Shorts"). In other languages they will not be found.
 - YouTube changes its markup often. If something stops working, open an issue with the page and what you see.
 
 ## License

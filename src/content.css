@@ -15,7 +15,13 @@ html:not([data-ytt-shorts="show"])
   display: none !important;
 }
 
-/* 2. The "Shorts" link, for when the sidebar is left on. */
+/* 2. The "Breaking news" shelf. content.js tags it by its title. */
+html:not([data-ytt-breaking-news="show"])
+  ytd-rich-section-renderer[data-ytt-shelf="breaking-news"] {
+  display: none !important;
+}
+
+/* 3. The "Shorts" link, for when the sidebar is left on. */
 html:not([data-ytt-shorts-link="show"])
   ytd-guide-entry-renderer:has(> a#endpoint[title="Shorts"]),
 html:not([data-ytt-shorts-link="show"])
@@ -23,7 +29,7 @@ html:not([data-ytt-shorts-link="show"])
   display: none !important;
 }
 
-/* 3. The sidebar: full guide, mini guide, and the menu button that opens them. */
+/* 4. The sidebar: full guide, mini guide, and the menu button that opens them. */
 html:not([data-ytt-sidebar="show"]) ytd-app tp-yt-app-drawer#guide,
 html:not([data-ytt-sidebar="show"]) ytd-app ytd-mini-guide-renderer,
 html:not([data-ytt-sidebar="show"]) ytd-masthead #guide-button {
@@ -35,7 +41,7 @@ html:not([data-ytt-sidebar="show"]) ytd-app ytd-page-manager {
 }
 
 /*
- * 4. Videos per row. YouTube writes these variables inline on the grid from
+ * 5. Videos per row. YouTube writes these variables inline on the grid from
  * its own width maths; an !important stylesheet value beats a plain inline one.
  * Shelves nested in the grid set their own copy, so they keep their layout.
  */
@@ -44,4 +50,30 @@ ytd-browse:is([page-subtype="home"], [page-subtype="subscriptions"])
   --ytd-rich-grid-items-per-row: var(--ytt-columns, 4) !important;
   --ytd-rich-grid-posts-per-row: var(--ytt-columns, 4) !important;
   --ytd-rich-grid-item-min-width: 0px !important;
+}
+
+/*
+ * 6. Square corners on thumbnails, on the hover preview that replaces them,
+ * and on the card highlight that shows on hover. Buttons inside a card keep
+ * their round shape.
+ */
+html:not([data-ytt-corners="round"])
+  :is(
+    yt-thumbnail-view-model,
+    ytd-thumbnail,
+    ytd-thumbnail #thumbnail,
+    ytd-playlist-thumbnail,
+    .ytdVideoPreviewMediaContainer,
+    #inline-preview-player
+  ),
+html:not([data-ytt-corners="round"]) ytd-thumbnail::before,
+html:not([data-ytt-corners="round"])
+  yt-lockup-view-model
+  yt-touch-feedback-shape:not(button yt-touch-feedback-shape)
+  div,
+html:not([data-ytt-corners="round"])
+  ytd-rich-item-renderer
+  yt-interaction:not(button yt-interaction)
+  div {
+  border-radius: 0 !important;
 }
