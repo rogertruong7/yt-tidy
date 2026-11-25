@@ -1,14 +1,23 @@
 {
   "manifest_version": 3,
-  "name": "YT Tidy",
-  "version": "1.2.0",
-  "description": "Hides Shorts shelves and the sidebar on YouTube, and shows 4 videos per row on Home and Subscriptions.",
-  "permissions": ["storage"],
+  "name": "YT Tidy: Hide Shorts & More Videos per Row on YouTube",
+  "version": "1.2.1",
+  "description": "Clean up YouTube: hide Shorts, Breaking news and Playables shelves, and show 4, 5 or 6 videos per row with square thumbnails.",
+  "permissions": [
+    "storage"
+  ],
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*"],
-      "css": ["src/content.css"],
-      "js": ["src/settings.js", "src/content.js"],
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "css": [
+        "src/content.css"
+      ],
+      "js": [
+        "src/settings.js",
+        "src/content.js"
+      ],
       "run_at": "document_start"
     }
   ],
@@ -26,5 +35,6 @@
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "short_name": "YT Tidy"
 }
