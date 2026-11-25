@@ -1,0 +1,47 @@
+/*
+ * Each rule is on by default and turned off by a data-ytt-* attribute that
+ * content.js puts on <html> when the user switches the setting off.
+ */
+
+/* 1. Shorts shelves in the Home and Subscriptions feeds. */
+html:not([data-ytt-shorts="show"])
+  ytd-browse:is([page-subtype="home"], [page-subtype="subscriptions"])
+  ytd-rich-section-renderer:has(
+    ytd-rich-shelf-renderer[is-shorts],
+    ytd-reel-shelf-renderer,
+    ytm-shorts-lockup-view-model,
+    ytm-shorts-lockup-view-model-v2
+  ) {
+  display: none !important;
+}
+
+/* 2. The "Shorts" link, for when the sidebar is left on. */
+html:not([data-ytt-shorts-link="show"])
+  ytd-guide-entry-renderer:has(> a#endpoint[title="Shorts"]),
+html:not([data-ytt-shorts-link="show"])
+  ytd-mini-guide-entry-renderer[aria-label="Shorts"] {
+  display: none !important;
+}
+
+/* 3. The sidebar: full guide, mini guide, and the menu button that opens them. */
+html:not([data-ytt-sidebar="show"]) ytd-app tp-yt-app-drawer#guide,
+html:not([data-ytt-sidebar="show"]) ytd-app ytd-mini-guide-renderer,
+html:not([data-ytt-sidebar="show"]) ytd-masthead #guide-button {
+  display: none !important;
+}
+
+html:not([data-ytt-sidebar="show"]) ytd-app ytd-page-manager {
+  margin-left: 0 !important;
+}
+
+/*
+ * 4. Videos per row. YouTube writes these variables inline on the grid from
+ * its own width maths; an !important stylesheet value beats a plain inline one.
+ * Shelves nested in the grid set their own copy, so they keep their layout.
+ */
+ytd-browse:is([page-subtype="home"], [page-subtype="subscriptions"])
+  ytd-rich-grid-renderer {
+  --ytd-rich-grid-items-per-row: var(--ytt-columns, 4) !important;
+  --ytd-rich-grid-posts-per-row: var(--ytt-columns, 4) !important;
+  --ytd-rich-grid-item-min-width: 0px !important;
+}

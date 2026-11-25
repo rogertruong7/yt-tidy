@@ -1,0 +1,13 @@
+# Secrets never belong here (the extension has none), but guard anyway
+.env
+.env.*
+*.pem
+*.key
+
+# Packaged builds
+*.crx
+*.zip
+dist/
+
+.DS_Store
+node_modules/

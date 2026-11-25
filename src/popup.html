@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>YT Tidy</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h1>YT Tidy</h1>
+
+    <fieldset class="columns">
+      <legend>Videos per row</legend>
+      <div class="segments" id="columns"></div>
+      <p class="note">Home and Subscriptions</p>
+    </fieldset>
+
+    <label class="toggle">
+      <input type="checkbox" id="hideShorts" />
+      <span>Hide Shorts shelves</span>
+    </label>
+    <label class="toggle">
+      <input type="checkbox" id="hideSidebar" />
+      <span>Hide the sidebar</span>
+    </label>
+    <label class="toggle">
+      <input type="checkbox" id="hideShortsLink" />
+      <span>Hide the Shorts link in the sidebar</span>
+    </label>
+
+    <script src="settings.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

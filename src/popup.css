@@ -1,0 +1,111 @@
+:root {
+  color-scheme: light dark;
+  --text: #0f0f0f;
+  --muted: #555;
+  --bg: #fff;
+  --line: #d9d9d9;
+  --chosen-bg: #0f0f0f;
+  --chosen-text: #fff;
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #f1f1f1;
+    --muted: #aaa;
+    --bg: #212121;
+    --line: #3f3f3f;
+    --chosen-bg: #f1f1f1;
+    --chosen-text: #0f0f0f;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 16px;
+  width: 240px;
+  color: var(--text);
+  background: var(--bg);
+}
+
+h1 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+fieldset {
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+}
+
+legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.segments {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.segments label {
+  flex: 1;
+  cursor: pointer;
+}
+
+.segments input {
+  position: absolute;
+  opacity: 0;
+}
+
+.segments span {
+  display: block;
+  padding: 6px 0;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.segments label + label span {
+  border-left: 1px solid var(--line);
+}
+
+.segments input:checked + span {
+  background: var(--chosen-bg);
+  color: var(--chosen-text);
+  font-weight: 600;
+}
+
+.segments input:focus-visible + span {
+  outline: 2px solid #3ea6ff;
+  outline-offset: -2px;
+}
+
+.note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.toggle input {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--chosen-bg);
+}
+
+.toggle input:disabled + span {
+  color: var(--muted);
+}
