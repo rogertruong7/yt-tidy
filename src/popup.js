@@ -3,6 +3,8 @@ const columnsGroup = document.getElementById("columns");
 const toggles = [
   "hideShorts",
   "hideBreakingNews",
+  "hidePlayables",
+  "hideMostRelevant",
   "squareCorners",
   "hideSidebar",
   "hideShortsLink",

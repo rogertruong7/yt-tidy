@@ -21,6 +21,29 @@ html:not([data-ytt-breaking-news="show"])
   display: none !important;
 }
 
+/* 2b. The "YouTube Playables" games shelf, recognised by its game cards. */
+html:not([data-ytt-playables="show"])
+  ytd-browse:is([page-subtype="home"], [page-subtype="subscriptions"])
+  ytd-rich-section-renderer:has(
+    ytd-mini-game-card-view-model,
+    mini-game-card-view-model,
+    ytd-game-card-renderer
+  ) {
+  display: none !important;
+}
+
+/*
+ * 2c. The "Most relevant" shelf on Subscriptions. It is the only shelf there
+ * besides Shorts; the "Latest" heading is a different element and stays.
+ */
+html:not([data-ytt-most-relevant="show"])
+  ytd-browse[page-subtype="subscriptions"]
+  ytd-rich-section-renderer:has(
+    #content > ytd-rich-shelf-renderer:not([is-shorts])
+  ) {
+  display: none !important;
+}
+
 /* 3. The "Shorts" link, for when the sidebar is left on. */
 html:not([data-ytt-shorts-link="show"])
   ytd-guide-entry-renderer:has(> a#endpoint[title="Shorts"]),
@@ -29,14 +52,17 @@ html:not([data-ytt-shorts-link="show"])
   display: none !important;
 }
 
-/* 4. The sidebar: full guide, mini guide, and the menu button that opens them. */
-html:not([data-ytt-sidebar="show"]) ytd-app tp-yt-app-drawer#guide,
-html:not([data-ytt-sidebar="show"]) ytd-app ytd-mini-guide-renderer,
-html:not([data-ytt-sidebar="show"]) ytd-masthead #guide-button {
+/*
+ * 4. The sidebar: full guide, mini guide, and the menu button that opens them.
+ * Unlike the rest, this one is off by default, so it waits for content.js.
+ */
+html[data-ytt-sidebar="hide"] ytd-app tp-yt-app-drawer#guide,
+html[data-ytt-sidebar="hide"] ytd-app ytd-mini-guide-renderer,
+html[data-ytt-sidebar="hide"] ytd-masthead #guide-button {
   display: none !important;
 }
 
-html:not([data-ytt-sidebar="show"]) ytd-app ytd-page-manager {
+html[data-ytt-sidebar="hide"] ytd-app ytd-page-manager {
   margin-left: 0 !important;
 }
 

@@ -17,8 +17,11 @@
   function apply(settings) {
     setShown("data-ytt-shorts", !settings.hideShorts);
     setShown("data-ytt-shorts-link", !settings.hideShortsLink);
-    setShown("data-ytt-sidebar", !settings.hideSidebar);
+    if (settings.hideSidebar) root.setAttribute("data-ytt-sidebar", "hide");
+    else root.removeAttribute("data-ytt-sidebar");
     setShown("data-ytt-breaking-news", !settings.hideBreakingNews);
+    setShown("data-ytt-playables", !settings.hidePlayables);
+    setShown("data-ytt-most-relevant", !settings.hideMostRelevant);
     if (settings.squareCorners) root.removeAttribute("data-ytt-corners");
     else root.setAttribute("data-ytt-corners", "round");
 
