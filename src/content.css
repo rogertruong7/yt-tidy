@@ -58,13 +58,13 @@ html[data-ytt-sidebar="hide"] ytd-app ytd-page-manager {
 /*
  * 5. Videos per row. YouTube writes these variables inline on the grid from
  * its own width maths; an !important stylesheet value beats a plain inline one.
- * content.js sets --ytt-columns: a fixed count on <html>, or for "auto" a
- * count worked out from each grid's own width.
+ * content.js sets --ytt-columns on <html>: the chosen count, scaled to the
+ * window's width when Auto is on.
  */
 ytd-browse:is([page-subtype="home"], [page-subtype="subscriptions"])
   ytd-rich-grid-renderer {
-  --ytd-rich-grid-items-per-row: var(--ytt-columns, 4) !important;
-  --ytd-rich-grid-posts-per-row: var(--ytt-columns, 4) !important;
+  --ytd-rich-grid-items-per-row: var(--ytt-columns, 5) !important;
+  --ytd-rich-grid-posts-per-row: var(--ytt-columns, 5) !important;
   --ytd-rich-grid-item-min-width: 0px !important;
 }
 
@@ -72,7 +72,7 @@ ytd-browse:is([page-subtype="home"], [page-subtype="subscriptions"])
 ytd-browse:is([page-subtype="home"], [page-subtype="subscriptions"])
   ytd-rich-shelf-renderer:not([is-shorts])
   ytd-rich-item-renderer {
-  --ytd-rich-grid-items-per-row: var(--ytt-columns, 4) !important;
+  --ytd-rich-grid-items-per-row: var(--ytt-columns, 5) !important;
 }
 
 /*

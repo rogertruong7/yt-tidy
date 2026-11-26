@@ -4,11 +4,11 @@ A Chrome extension that cleans up the YouTube home page:
 
 1. Hides the Shorts shelves on Home and Subscriptions.
 2. Hides every other shelf too: Breaking news, Mixes, Recently played, games, "Most relevant" on Subscriptions, and any new kind YouTube adds.
-3. Fits the number of videos per row to your screen, instead of YouTube's 3: 5 on a laptop or 1920px screen, 7 at 2560px, 10 on a 3440px ultrawide.
+3. Shows 5 videos per row instead of YouTube's 3, or any count from 3 to 8. With Auto-fit on, that count is for a normal screen (1440 to 1920px wide), and it scales with the window: 6 becomes 8 at 2560px and 11 on a 3440px ultrawide.
 4. Squares off the rounded corners on thumbnails and their hover highlight.
 5. Optionally hides the left sidebar too, so the grid gets the full width (off by default).
 
-Each one can be switched on or off from the toolbar popup, and the row count fixed at 3 to 8 instead of Auto.
+Each one can be switched on or off from the toolbar popup.
 
 ### Before
 
@@ -20,7 +20,7 @@ Each one can be switched on or off from the toolbar popup, and the row count fix
 
 ### Settings
 
-<img src="docs/popup.png" alt="The YT Tidy popup at its defaults: Auto videos per row, every shelf hidden, square corners on, sidebar left visible" width="272">
+<img src="docs/popup.png" alt="The YT Tidy popup at its defaults: 5 videos per row with Auto-fit on, every shelf hidden, square corners on, sidebar left visible" width="292">
 
 ## Install
 
@@ -35,7 +35,7 @@ It needs only the `storage` permission (for your settings) and runs only on `www
 
 - `src/content.css` does the hiding and sets YouTube's own `--ytd-rich-grid-items-per-row` variable. YouTube writes that variable inline from its width maths; an `!important` stylesheet value overrides it.
 - Shelves are matched by their format (a titled row of cards with a "Show more" button), not by their titles, so new kinds are hidden too. Any shelf you keep gets cards the same size as the grid's.
-- On Auto, `src/content.js` watches each grid's width and picks the count that keeps cards close to 300px wide.
+- With Auto-fit on, `src/content.js` scales the chosen count by the window's width past 1920px (or under 1440px) and updates it as you resize.
 - YouTube drops a shelf into the feed after every few rows of its 3-wide grid. At other widths those land mid-row and leave gaps, so `src/content.js` sets the CSS `order` of each shelf to hold it back until the row it interrupted is full. Section headings such as "Latest" on Subscriptions are left in place.
 - Settings live in `chrome.storage.sync` and are applied as `data-ytt-*` attributes on `<html>`. The hiding rules are on by default in CSS, so no shelf flashes on page load. Hiding the sidebar is opt-in and waits for your settings to load.
 

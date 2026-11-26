@@ -5,14 +5,17 @@ var YT_TIDY_DEFAULTS = {
   hideShelves: true,
   hideShortsLink: true,
   hideSidebar: false,
-  videosPerRow: "auto",
+  videosPerRow: 5,
+  autoFit: true,
   squareCorners: true,
 };
 
-// "auto" aims for cards about YT_TIDY_CARD_WIDTH px wide: 5 per row on a
-// laptop or 1920px screen, 7 at 2560px, 10 on a 3440px ultrawide.
-var YT_TIDY_ROW_CHOICES = ["auto", 3, 4, 5, 6, 7, 8];
-var YT_TIDY_CARD_WIDTH = 300;
+var YT_TIDY_ROW_CHOICES = [3, 4, 5, 6, 7, 8];
+
+// With autoFit on, the chosen count is what a window between these widths
+// gets. Wider windows get proportionally more (6 at 1920px is 8 at 2560px),
+// narrower ones fewer.
+var YT_TIDY_NORMAL_WIDTH = { min: 1440, max: 1920 };
 
 // Settings from earlier versions, removed from storage on load.
 var YT_TIDY_OLD_KEYS = [

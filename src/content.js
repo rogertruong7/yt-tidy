@@ -1,4 +1,4 @@
-/* global YT_TIDY_DEFAULTS, YT_TIDY_ROW_CHOICES, YT_TIDY_CARD_WIDTH, YT_TIDY_OLD_KEYS */
+/* global YT_TIDY_DEFAULTS, YT_TIDY_ROW_CHOICES, YT_TIDY_NORMAL_WIDTH, YT_TIDY_OLD_KEYS */
 (() => {
   const root = document.documentElement;
 
@@ -14,8 +14,9 @@
     else root.removeAttribute(attribute);
   }
 
-  // The count chosen in the popup, or "auto".
-  let videosPerRowSetting = YT_TIDY_DEFAULTS.videosPerRow;
+  // The count chosen in the popup, and whether to scale it with the window.
+  let rowSetting = YT_TIDY_DEFAULTS.videosPerRow;
+  let autoFit = YT_TIDY_DEFAULTS.autoFit;
 
   function apply(settings) {
     setShown("data-ytt-shorts", !settings.hideShorts);
@@ -26,18 +27,35 @@
     if (settings.squareCorners) root.removeAttribute("data-ytt-corners");
     else root.setAttribute("data-ytt-corners", "round");
 
-    const choice = YT_TIDY_ROW_CHOICES.find(
-      (option) => String(option) === String(settings.videosPerRow),
-    );
-    videosPerRowSetting = choice ?? YT_TIDY_DEFAULTS.videosPerRow;
-    if (videosPerRowSetting === "auto") {
-      root.style.removeProperty("--ytt-columns");
-    } else {
-      root.style.setProperty("--ytt-columns", String(videosPerRowSetting));
-    }
+    // 1.3.0 stored "auto" here; anything unknown falls back to the default.
+    const count = Number(settings.videosPerRow);
+    rowSetting = YT_TIDY_ROW_CHOICES.includes(count)
+      ? count
+      : YT_TIDY_DEFAULTS.videosPerRow;
+    autoFit = Boolean(settings.autoFit);
+    setColumns();
 
-    scheduleReflow();
+    scheduleReflow(); // a shelf may have been shown or hidden
   }
+
+  // ---- Videos per row, scaled to the window when autoFit is on ----
+
+  function columnsFor(width) {
+    if (!autoFit) return rowSetting;
+    const { min, max } = YT_TIDY_NORMAL_WIDTH;
+    const scale = width > max ? width / max : width < min ? width / min : 1;
+    return Math.min(Math.max(Math.round(rowSetting * scale), 2), 12);
+  }
+
+  function setColumns() {
+    const columns = String(columnsFor(window.innerWidth));
+    if (root.style.getPropertyValue("--ytt-columns") !== columns) {
+      root.style.setProperty("--ytt-columns", columns);
+      scheduleReflow();
+    }
+  }
+
+  window.addEventListener("resize", setColumns);
 
   function loadSettings() {
     chrome.storage.sync.get(YT_TIDY_DEFAULTS).then(apply);
@@ -47,39 +65,6 @@
   chrome.storage.sync.remove(YT_TIDY_OLD_KEYS);
   chrome.storage.onChanged.addListener((_changes, area) => {
     if (area === "sync") loadSettings();
-  });
-
-  // ---- "auto": a count that keeps cards near YT_TIDY_CARD_WIDTH ----
-
-  const CARD_GAP = 16; // YouTube's --ytd-rich-grid-item-margin
-
-  function autoColumns(grid) {
-    // The feed sits inside the grid with a gap on each side. Measure the grid,
-    // not the feed: the feed's max-width depends on the count set here.
-    const width = grid.clientWidth - 2 * CARD_GAP;
-    const fits = Math.round(
-      (width + CARD_GAP) / (YT_TIDY_CARD_WIDTH + CARD_GAP),
-    );
-    return Math.min(Math.max(fits, 2), 12);
-  }
-
-  // Sets --ytt-columns on the grid itself, so the Home and Subscriptions
-  // grids each get their own count. A hidden grid (width 0) keeps its last one.
-  function sizeGrid(grid) {
-    if (videosPerRowSetting !== "auto") {
-      grid.style.removeProperty("--ytt-columns");
-      return;
-    }
-    if (!grid.clientWidth) return;
-    const columns = String(autoColumns(grid));
-    if (grid.style.getPropertyValue("--ytt-columns") !== columns) {
-      grid.style.setProperty("--ytt-columns", columns);
-    }
-  }
-
-  const gridSizes = new ResizeObserver((entries) => {
-    for (const { target } of entries) sizeGrid(target);
-    scheduleReflow();
   });
 
   // ---- Keep shelves from leaving a half-empty row ----
@@ -152,12 +137,7 @@
     reflowQueued = true;
     requestAnimationFrame(() => {
       reflowQueued = false;
-      for (const contents of document.querySelectorAll(FEED_CONTENTS)) {
-        const grid = contents.parentElement;
-        gridSizes.observe(grid); // no-op once observed
-        sizeGrid(grid); // YouTube may have rewritten the grid's inline style
-        reflow(contents);
-      }
+      document.querySelectorAll(FEED_CONTENTS).forEach(reflow);
     });
   }
 
