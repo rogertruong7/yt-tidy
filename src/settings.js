@@ -1,15 +1,23 @@
-// Shared by the content script and the popup.
 // content.css applies these defaults before storage is read, so the page
 // never flashes a hidden shelf. Only the sidebar is opt-in.
 var YT_TIDY_DEFAULTS = {
-  hideShorts: true, // Shorts shelves in the Home and Subscriptions feeds
-  hideBreakingNews: true, // the "Breaking news" shelf on Home
-  hidePlayables: true, // the "YouTube Playables" games shelf on Home
-  hideMostRelevant: true, // the "Most relevant" shelf on Subscriptions
-  hideShortsLink: true, // the "Shorts" entry in the sidebar (if the sidebar is shown)
-  hideSidebar: false, // the left sidebar, its mini version, and the menu button
-  columns: 4, // videos per row on Home and Subscriptions
-  squareCorners: true, // square thumbnails instead of rounded ones
+  hideShorts: true,
+  hideShelves: true,
+  hideShortsLink: true,
+  hideSidebar: false,
+  videosPerRow: "auto",
+  squareCorners: true,
 };
 
-var YT_TIDY_COLUMN_CHOICES = [3, 4, 5, 6];
+// "auto" aims for cards about YT_TIDY_CARD_WIDTH px wide: 5 per row on a
+// laptop or 1920px screen, 7 at 2560px, 10 on a 3440px ultrawide.
+var YT_TIDY_ROW_CHOICES = ["auto", 3, 4, 5, 6, 7, 8];
+var YT_TIDY_CARD_WIDTH = 300;
+
+// Settings from earlier versions, removed from storage on load.
+var YT_TIDY_OLD_KEYS = [
+  "columns",
+  "hideBreakingNews",
+  "hidePlayables",
+  "hideMostRelevant",
+];

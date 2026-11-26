@@ -15,31 +15,20 @@ html:not([data-ytt-shorts="show"])
   display: none !important;
 }
 
-/* 2. The "Breaking news" shelf. content.js tags it by its title. */
-html:not([data-ytt-breaking-news="show"])
-  ytd-rich-section-renderer[data-ytt-shelf="breaking-news"] {
-  display: none !important;
-}
-
-/* 2b. The "YouTube Playables" games shelf, recognised by its game cards. */
-html:not([data-ytt-playables="show"])
+/*
+ * 2. Every other shelf: a titled row of cards with a "Show more" button, such
+ * as Breaking news, Mixes, Recently played, games and "Most relevant". They
+ * are matched by that format rather than by title, since YouTube keeps adding
+ * new ones. Section headings such as "Latest" on Subscriptions are a
+ * different element and stay.
+ */
+html:not([data-ytt-shelves="show"])
   ytd-browse:is([page-subtype="home"], [page-subtype="subscriptions"])
   ytd-rich-section-renderer:has(
+    #content > ytd-rich-shelf-renderer:not([is-shorts]),
     ytd-mini-game-card-view-model,
     mini-game-card-view-model,
     ytd-game-card-renderer
-  ) {
-  display: none !important;
-}
-
-/*
- * 2c. The "Most relevant" shelf on Subscriptions. It is the only shelf there
- * besides Shorts; the "Latest" heading is a different element and stays.
- */
-html:not([data-ytt-most-relevant="show"])
-  ytd-browse[page-subtype="subscriptions"]
-  ytd-rich-section-renderer:has(
-    #content > ytd-rich-shelf-renderer:not([is-shorts])
   ) {
   display: none !important;
 }
@@ -69,13 +58,21 @@ html[data-ytt-sidebar="hide"] ytd-app ytd-page-manager {
 /*
  * 5. Videos per row. YouTube writes these variables inline on the grid from
  * its own width maths; an !important stylesheet value beats a plain inline one.
- * Shelves nested in the grid set their own copy, so they keep their layout.
+ * content.js sets --ytt-columns: a fixed count on <html>, or for "auto" a
+ * count worked out from each grid's own width.
  */
 ytd-browse:is([page-subtype="home"], [page-subtype="subscriptions"])
   ytd-rich-grid-renderer {
   --ytd-rich-grid-items-per-row: var(--ytt-columns, 4) !important;
   --ytd-rich-grid-posts-per-row: var(--ytt-columns, 4) !important;
   --ytd-rich-grid-item-min-width: 0px !important;
+}
+
+/* A shelf you choose to keep gets cards the same size as the grid's. */
+ytd-browse:is([page-subtype="home"], [page-subtype="subscriptions"])
+  ytd-rich-shelf-renderer:not([is-shorts])
+  ytd-rich-item-renderer {
+  --ytd-rich-grid-items-per-row: var(--ytt-columns, 4) !important;
 }
 
 /*

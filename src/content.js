@@ -1,4 +1,4 @@
-/* global YT_TIDY_DEFAULTS, YT_TIDY_COLUMN_CHOICES */
+/* global YT_TIDY_DEFAULTS, YT_TIDY_ROW_CHOICES, YT_TIDY_CARD_WIDTH, YT_TIDY_OLD_KEYS */
 (() => {
   const root = document.documentElement;
 
@@ -14,21 +14,27 @@
     else root.removeAttribute(attribute);
   }
 
+  // The count chosen in the popup, or "auto".
+  let videosPerRowSetting = YT_TIDY_DEFAULTS.videosPerRow;
+
   function apply(settings) {
     setShown("data-ytt-shorts", !settings.hideShorts);
+    setShown("data-ytt-shelves", !settings.hideShelves);
     setShown("data-ytt-shorts-link", !settings.hideShortsLink);
     if (settings.hideSidebar) root.setAttribute("data-ytt-sidebar", "hide");
     else root.removeAttribute("data-ytt-sidebar");
-    setShown("data-ytt-breaking-news", !settings.hideBreakingNews);
-    setShown("data-ytt-playables", !settings.hidePlayables);
-    setShown("data-ytt-most-relevant", !settings.hideMostRelevant);
     if (settings.squareCorners) root.removeAttribute("data-ytt-corners");
     else root.setAttribute("data-ytt-corners", "round");
 
-    const columns = YT_TIDY_COLUMN_CHOICES.includes(Number(settings.columns))
-      ? Number(settings.columns)
-      : YT_TIDY_DEFAULTS.columns;
-    root.style.setProperty("--ytt-columns", String(columns));
+    const choice = YT_TIDY_ROW_CHOICES.find(
+      (option) => String(option) === String(settings.videosPerRow),
+    );
+    videosPerRowSetting = choice ?? YT_TIDY_DEFAULTS.videosPerRow;
+    if (videosPerRowSetting === "auto") {
+      root.style.removeProperty("--ytt-columns");
+    } else {
+      root.style.setProperty("--ytt-columns", String(videosPerRowSetting));
+    }
 
     scheduleReflow();
   }
@@ -38,13 +44,47 @@
   }
 
   loadSettings();
+  chrome.storage.sync.remove(YT_TIDY_OLD_KEYS);
   chrome.storage.onChanged.addListener((_changes, area) => {
     if (area === "sync") loadSettings();
   });
 
+  // ---- "auto": a count that keeps cards near YT_TIDY_CARD_WIDTH ----
+
+  const CARD_GAP = 16; // YouTube's --ytd-rich-grid-item-margin
+
+  function autoColumns(grid) {
+    // The feed sits inside the grid with a gap on each side. Measure the grid,
+    // not the feed: the feed's max-width depends on the count set here.
+    const width = grid.clientWidth - 2 * CARD_GAP;
+    const fits = Math.round(
+      (width + CARD_GAP) / (YT_TIDY_CARD_WIDTH + CARD_GAP),
+    );
+    return Math.min(Math.max(fits, 2), 12);
+  }
+
+  // Sets --ytt-columns on the grid itself, so the Home and Subscriptions
+  // grids each get their own count. A hidden grid (width 0) keeps its last one.
+  function sizeGrid(grid) {
+    if (videosPerRowSetting !== "auto") {
+      grid.style.removeProperty("--ytt-columns");
+      return;
+    }
+    if (!grid.clientWidth) return;
+    const columns = String(autoColumns(grid));
+    if (grid.style.getPropertyValue("--ytt-columns") !== columns) {
+      grid.style.setProperty("--ytt-columns", columns);
+    }
+  }
+
+  const gridSizes = new ResizeObserver((entries) => {
+    for (const { target } of entries) sizeGrid(target);
+    scheduleReflow();
+  });
+
   // ---- Keep shelves from leaving a half-empty row ----
   //
-  // YouTube drops a shelf (Breaking news, Shorts, "Most relevant", ...) into the
+  // YouTube drops a shelf (Breaking news, Shorts, Mixes, ...) into the
   // feed after every 2 or 3 rows of its own 3-wide grid. At 4 wide that lands
   // mid-row and leaves a gap. The feed is a flexbox, so instead of moving nodes
   // (which would upset YouTube's own bookkeeping) we set each child's CSS
@@ -64,29 +104,7 @@
     return content?.firstElementChild?.tagName === "YTD-SHELF-RENDERER";
   }
 
-  // The "Breaking news" shelf has no marker of its own, only its title, so
-  // tag it for content.css. Re-checked on every pass because YouTube reuses
-  // section elements when the feed changes (e.g. picking a topic chip).
-  const BREAKING_NEWS_TITLE = /^breaking news$/i;
-
-  function tagShelves(contents) {
-    for (const section of contents.querySelectorAll(
-      ":scope > ytd-rich-section-renderer",
-    )) {
-      const title = section
-        .querySelector("ytd-rich-shelf-renderer #title")
-        ?.textContent.trim();
-      const kind = title && BREAKING_NEWS_TITLE.test(title) ? "breaking-news" : "";
-      if ((section.dataset.yttShelf ?? "") !== kind) {
-        if (kind) section.dataset.yttShelf = kind;
-        else delete section.dataset.yttShelf;
-      }
-    }
-  }
-
   function reflow(contents) {
-    tagShelves(contents);
-
     const perRow = videosPerRow(contents.parentElement);
     if (!perRow) return;
 
@@ -134,21 +152,24 @@
     reflowQueued = true;
     requestAnimationFrame(() => {
       reflowQueued = false;
-      document.querySelectorAll(FEED_CONTENTS).forEach(reflow);
+      for (const contents of document.querySelectorAll(FEED_CONTENTS)) {
+        const grid = contents.parentElement;
+        gridSizes.observe(grid); // no-op once observed
+        sizeGrid(grid); // YouTube may have rewritten the grid's inline style
+        reflow(contents);
+      }
     });
   }
 
-  // Re-run when videos or shelves are added to a feed, when a shelf renders
-  // its contents (that is when a Shorts shelf becomes hidden, or a heading
-  // becomes recognisable), and when a shelf's title text arrives.
+  // Re-run when videos or shelves are added to a feed, and when a shelf
+  // renders its contents (that is when it becomes hidden, or a heading
+  // becomes recognisable).
   new MutationObserver((records) => {
     for (const { target } of records) {
       const parentTag = target.parentElement?.tagName;
       if (
         (target.id === "contents" && parentTag === "YTD-RICH-GRID-RENDERER") ||
-        (target.id === "content" && parentTag === "YTD-RICH-SECTION-RENDERER") ||
-        (target.closest?.("ytd-rich-shelf-renderer #title") &&
-          target.closest("ytd-rich-section-renderer"))
+        (target.id === "content" && parentTag === "YTD-RICH-SECTION-RENDERER")
       ) {
         scheduleReflow();
         return;

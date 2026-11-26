@@ -1,10 +1,8 @@
-/* global YT_TIDY_DEFAULTS, YT_TIDY_COLUMN_CHOICES */
+/* global YT_TIDY_DEFAULTS, YT_TIDY_ROW_CHOICES */
 const columnsGroup = document.getElementById("columns");
 const toggles = [
   "hideShorts",
-  "hideBreakingNews",
-  "hidePlayables",
-  "hideMostRelevant",
+  "hideShelves",
   "squareCorners",
   "hideSidebar",
   "hideShortsLink",
@@ -12,14 +10,14 @@ const toggles = [
 const hideSidebar = document.getElementById("hideSidebar");
 const hideShortsLink = document.getElementById("hideShortsLink");
 
-for (const count of YT_TIDY_COLUMN_CHOICES) {
+for (const choice of YT_TIDY_ROW_CHOICES) {
   const label = document.createElement("label");
   const input = document.createElement("input");
   input.type = "radio";
-  input.name = "columns";
-  input.value = String(count);
+  input.name = "videosPerRow";
+  input.value = String(choice);
   const text = document.createElement("span");
-  text.textContent = String(count);
+  text.textContent = choice === "auto" ? "Auto" : String(choice);
   label.append(input, text);
   columnsGroup.append(label);
 }
@@ -32,7 +30,7 @@ function syncSidebarDependency() {
 chrome.storage.sync.get(YT_TIDY_DEFAULTS).then((settings) => {
   for (const input of toggles) input.checked = Boolean(settings[input.id]);
   const chosen = columnsGroup.querySelector(
-    `input[value="${Number(settings.columns)}"]`,
+    `input[value="${CSS.escape(String(settings.videosPerRow))}"]`,
   );
   if (chosen) chosen.checked = true;
   syncSidebarDependency();
@@ -46,5 +44,6 @@ for (const input of toggles) {
 }
 
 columnsGroup.addEventListener("change", (event) => {
-  chrome.storage.sync.set({ columns: Number(event.target.value) });
+  const { value } = event.target;
+  chrome.storage.sync.set({ videosPerRow: value === "auto" ? value : Number(value) });
 });

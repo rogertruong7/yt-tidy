@@ -3,12 +3,12 @@
 A Chrome extension that cleans up the YouTube home page:
 
 1. Hides the Shorts shelves on Home and Subscriptions.
-2. Hides the Breaking news and YouTube Playables (games) shelves on Home, and the "Most relevant" shelf on Subscriptions.
-3. Shows 4 videos per row on Home and Subscriptions, instead of YouTube's 3.
+2. Hides every other shelf too: Breaking news, Mixes, Recently played, games, "Most relevant" on Subscriptions, and any new kind YouTube adds.
+3. Fits the number of videos per row to your screen, instead of YouTube's 3: 5 on a laptop or 1920px screen, 7 at 2560px, 10 on a 3440px ultrawide.
 4. Squares off the rounded corners on thumbnails and their hover highlight.
 5. Optionally hides the left sidebar too, so the grid gets the full width (off by default).
 
-Each one can be switched on or off, and the row count changed (3 to 6), from the toolbar popup.
+Each one can be switched on or off from the toolbar popup, and the row count fixed at 3 to 8 instead of Auto.
 
 ### Before
 
@@ -16,11 +16,11 @@ Each one can be switched on or off, and the row count changed (3 to 6), from the
 
 ### After
 
-![YouTube Home with YT Tidy: 4 videos per row, square thumbnails, no shelves](docs/after.jpg)
+![YouTube Home with YT Tidy: more videos per row, square thumbnails, no shelves](docs/after.jpg)
 
 ### Settings
 
-<img src="docs/popup.png" alt="The YT Tidy popup at its defaults: 4 videos per row, every shelf hidden, square corners on, sidebar left visible" width="272">
+<img src="docs/popup.png" alt="The YT Tidy popup at its defaults: Auto videos per row, every shelf hidden, square corners on, sidebar left visible" width="272">
 
 ## Install
 
@@ -34,13 +34,15 @@ It needs only the `storage` permission (for your settings) and runs only on `www
 ## How it works
 
 - `src/content.css` does the hiding and sets YouTube's own `--ytd-rich-grid-items-per-row` variable. YouTube writes that variable inline from its width maths; an `!important` stylesheet value overrides it.
-- YouTube drops a shelf (Breaking news, "Most relevant", Shorts) into the feed after every few rows of its 3-wide grid. At 4 wide those land mid-row and leave gaps, so `src/content.js` sets the CSS `order` of each shelf to hold it back until the row it interrupted is full. Section headings such as "Latest" on Subscriptions are left in place.
+- Shelves are matched by their format (a titled row of cards with a "Show more" button), not by their titles, so new kinds are hidden too. Any shelf you keep gets cards the same size as the grid's.
+- On Auto, `src/content.js` watches each grid's width and picks the count that keeps cards close to 300px wide.
+- YouTube drops a shelf into the feed after every few rows of its 3-wide grid. At other widths those land mid-row and leave gaps, so `src/content.js` sets the CSS `order` of each shelf to hold it back until the row it interrupted is full. Section headings such as "Latest" on Subscriptions are left in place.
 - Settings live in `chrome.storage.sync` and are applied as `data-ytt-*` attributes on `<html>`. The hiding rules are on by default in CSS, so no shelf flashes on page load. Hiding the sidebar is opt-in and waits for your settings to load.
 
 ## Notes
 
 - With the sidebar hidden, the menu button goes too. Subscriptions is still at `youtube.com/feed/subscriptions`, or switch the sidebar back on in the popup.
-- The Breaking news shelf and the sidebar's Shorts link have no marker of their own, so they are matched by their English titles ("Breaking news", "Shorts"). In other languages they will not be found.
+- The sidebar's Shorts link has no marker of its own, so it is matched by its English title ("Shorts"). In other languages it will not be found.
 - YouTube changes its markup often. If something stops working, open an issue with the page and what you see.
 
 ## License
